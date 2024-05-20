@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Formulario de Pago{% endblock %}
+
+{% block contenido %}
+<div class="formulario">
+    <h1>Registrar</h1>
+    <h1>Formulario de Pago</h1>
+    <form action="{% url 'iniciar_pago' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Iniciar Pago</button>
+    </form>
+</div>
+{% endblock %}

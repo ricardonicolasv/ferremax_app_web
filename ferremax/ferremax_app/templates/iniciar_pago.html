@@ -8,10 +8,10 @@
     <h1> Registrar</h1>
 {{error}}
 <h1>Formulario de Pago</h1>
-    <form action="{% url 'iniciar_pago' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Pagar</button>
-    </form>
+<form action="{% url 'iniciar_pago' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Iniciar Pago</button>
+</form>
 </form>
 </div>
 {% endblock %}

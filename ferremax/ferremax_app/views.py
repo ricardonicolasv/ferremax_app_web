@@ -13,6 +13,7 @@ from .forms import RegistroForm, ProductoForm, EliminarProForm,ModificarForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.db import IntegrityError
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # ViewSets for your models
 def home(request):
@@ -74,23 +75,29 @@ class MensajeViewSet(viewsets.ModelViewSet):
     queryset = Mensaje.objects.all()
     serializer_class = MensajeSerializer
 
-
-# Configuración para el ambiente de integración
+# Configuración de las opciones de Transbank para integración
 options = WebpayOptions(
-    IntegrationCommerceCodes.WEBPAY_PLUS,
-    IntegrationApiKeys.WEBPAY
+    commerce_code=IntegrationCommerceCodes.WEBPAY_PLUS,  # Código de comercio de integración
+    api_key=IntegrationApiKeys.WEBPAY,                  # API Key de integración
+    integration_type="TEST"                             # Tipo de integración (cambiar a "LIVE" en producción)
 )
 
+import logging
 
+logger = logging.getLogger(__name__)
 
+@csrf_exempt
 def iniciar_pago(request):
     try:
         # Obtener el detalle de pedido de la base de datos
         detalle_pedido = DetallePedido.objects.first()  # Obtener el primer detalle de pedido (ajustar según tu lógica)
 
+        if not detalle_pedido:
+            return render(request, 'error.html', {"message": "No hay detalles de pedido disponibles"})
+
         # Obtener los datos necesarios del detalle de pedido
-        buy_order = detalle_pedido.id_pedido.numero_orden  # Obtener el número de orden del pedido asociado al detalle
-        session_id = detalle_pedido.id_pedido.id_sesion  # Obtener el ID de sesión del pedido asociado al detalle
+        buy_order = str(detalle_pedido.id_pedido.id_pedido)  # Usar id_pedido como número de orden del pedido asociado al detalle
+        session_id = str(detalle_pedido.id_pedido.id_pedido)  # Usar id_pedido como ID de sesión del pedido asociado al detalle
         amount = detalle_pedido.precio_unitario * detalle_pedido.cantidad  # Calcular el monto del detalle
 
         # Construir la URL de retorno
@@ -99,16 +106,22 @@ def iniciar_pago(request):
         # Crear la transacción utilizando los datos del detalle de pedido
         response = Transaction(options).create(buy_order, session_id, amount, return_url)
 
-        if response.get('status') == 'INITIALIZED':
-            # Redireccionar al usuario a la URL de inicio de pago
+        logger.info("Response from Transbank: %s", response)
+
+        # Verificar si la respuesta contiene un token y una URL para redirigir al usuario
+        if response.get('token') and response.get('url'):
+            # Redireccionar al usuario a la URL de inicio de pago proporcionada por Transbank
+            logger.info("Redirecting user to Transbank payment page.")
             return HttpResponseRedirect(response['url'])
         else:
             # Manejar cualquier error que ocurra durante la creación de la transacción
+            logger.error("Error starting payment: %s", response)
             return render(request, 'error.html', {"message": "Error al iniciar el pago", "details": response})
     except Exception as e:
         # Manejar cualquier excepción que pueda ocurrir durante el procesamiento
+        logger.exception("Error processing request: %s", str(e))
         return render(request, 'error.html', {"message": "Error al procesar la solicitud", "error": str(e)})
-
+@csrf_exempt
 @api_view(['GET'])
 def exito_pago(request):
     try:

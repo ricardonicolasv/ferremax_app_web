@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Error{% endblock %}
+
+{% block contenido %}
+<div class="error">
+    <h1>{{ message }}</h1>
+    {% if details %}
+        <p>Detalles: {{ details }}</p>
+    {% endif %}
+    {% if error %}
+        <p>Error: {{ error }}</p>
+    {% endif %}
+</div>
+{% endblock %}
