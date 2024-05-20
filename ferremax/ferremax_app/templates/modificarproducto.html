@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Ferremax - Modificar Producto{% endblock %}
+
+{% block contenido %}
+<div class="formulario">
+<form method="post">
+    <h1>Modificar Producto</h1>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="text-white btn bg-custom" type="submit" id="btnsubmit">Guardar cambios</button>
+</form>
+</div>
+{% endblock %}

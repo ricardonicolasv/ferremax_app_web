@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Ferremax - Modificar Producto{% endblock %}
+
+{% block contenido %}
+<div class="formulario">
+<form method="post">
+  <h2>Eliminar Producto</h2>
+  <p>¿Estás seguro que quieres eliminar el producto {{ producto.nombre }}?</p>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="text-white btn bg-custom" type="submit" id="btnsubmit">Eliminar</button>
+</form>
+</div>
+{% endblock %}

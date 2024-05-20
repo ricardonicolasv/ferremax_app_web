@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="formulario">
+  <h2>Lista de Productos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Especialidad</th>
+        <th>Categoría</th>
+        <th>UPC</th>
+        <th>Nombre</th>
+        <th>Marca</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for producto in productos %}
+        <tr>
+          <td>{{ producto.id }}</td>
+          <td>{{ producto.id_especialidad.nombre_especialidad }}</td>
+          <td>{{ producto.id_categoria.nombre }}</td>     <!-- Ajusta según los campos de tu modelo -->
+          <td>{{ producto.codigo_upc }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.marca }}</td>
+          <td>
+            <a href="{% url 'modificar_producto' producto.id %}">Modificar</a>
+            <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
